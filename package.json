@@ -1,0 +1,22 @@
+{
+  "name": "au-invoice-check",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Australian tax-invoice validation and supplier verification for AI agents via MCP.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "check": "npm test && wrangler deploy --dry-run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "agents": "^0.28.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.5",
+    "wrangler": "^4.151.1"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "au-invoice-check",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-15",
+  "services": [
+    {
+      "binding": "BUSINESS_IDENTITY_SERVICE",
+      "service": "au-business-identity-service"
+    }
+  ]
+}
