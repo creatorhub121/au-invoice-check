@@ -48,6 +48,7 @@ describe(
           body.mcp_tools
         ).toEqual([
           "validate_tax_invoice",
+          "check_invoice_gst",
         ]);
       }
     );

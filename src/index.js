@@ -12,6 +12,89 @@ import {
   validateTaxInvoice,
 } from "./invoice.js";
 
+import {
+  checkInvoiceGst,
+} from "./gst.js";
+
+const invoiceInputSchema = {
+  supplier: z
+    .object({
+      name: z
+        .string()
+        .optional(),
+      abn: z
+        .string()
+        .optional(),
+    })
+    .optional(),
+
+  buyer: z
+    .object({
+      name: z
+        .string()
+        .optional(),
+      abn: z
+        .string()
+        .optional(),
+    })
+    .optional(),
+
+  issue_date: z
+    .string()
+    .optional(),
+
+  document_intent: z
+    .string()
+    .optional(),
+
+  currency: z
+    .string()
+    .optional(),
+
+  items: z
+    .array(
+      z.object({
+        description: z
+          .string()
+          .optional(),
+
+        quantity: z
+          .number()
+          .nonnegative()
+          .optional(),
+
+        line_total: z
+          .number()
+          .nonnegative()
+          .optional(),
+
+        taxable: z
+          .boolean()
+          .optional(),
+     })
+   )
+   .optional(),
+
+ subtotal: z
+   .number()
+   .nonnegative()
+   .optional(),
+
+  gst: z
+    .number()
+    .nonnegative()
+    .optional(),
+
+  total: z
+    .number()
+    .nonnegative()
+    .optional(),
+
+  gst_included: z
+    .boolean()
+    .optional(),
+};
+
 function toolSuccess(data) {
   return {
     content: [
@@ -34,80 +117,26 @@ function createServer() {
     {
       description:
         "Check structured Australian tax-invoice data for the core information required within the supported v0.1 scope.",
-      inputSchema: {
-        supplier: z
-          .object({
-            name: z.string().optional(),
-            abn: z.string().optional(),
-          })
-          .optional(),
-
-        buyer: z
-          .object({
-            name: z.string().optional(),
-            abn: z.string().optional(),
-          })
-          .optional(),
-
-        issue_date: z
-          .string()
-          .optional(),
-
-        document_intent: z
-          .string()
-          .optional(),
-
-        currency: z
-          .string()
-          .optional(),
-
-        items: z
-          .array(
-            z.object({
-              description: z
-                .string()
-                .optional(),
-
-              quantity: z
-                .number()
-                .nonnegative()
-                .optional(),
-
-              line_total: z
-                .number()
-                .nonnegative()
-                .optional(),
-
-              taxable: z
-                .boolean()
-                .optional(),
-            })
-          )
-          .optional(),
-
-        subtotal: z
-          .number()
-          .nonnegative()
-          .optional(),
-
-        gst: z
-          .number()
-          .nonnegative()
-          .optional(),
-
-        total: z
-          .number()
-          .nonnegative()
-          .optional(),
-
-        gst_included: z
-          .boolean()
-          .optional(),
-      },
+      inputSchema:
+        invoiceInputSchema,
     },
     async (input) =>
       toolSuccess(
         validateTaxInvoice(input)
+      )
+  );
+
+  server.registerTool(
+    "check_invoice_gst",
+    {
+      description:
+        "Check GST arithmetic and line-total reconciliation for supported standard Australian GST invoice scenarios.",
+      inputSchema:
+        invoiceInputSchema,
+    },
+    async (input) =>
+      toolSuccess(
+        checkInvoiceGst(input)
       )
   );
 
@@ -133,7 +162,8 @@ export default {
     if (url.pathname === "/health") {
       return jsonResponse({
         ok: true,
-        service: "au-invoice-check",
+        service:
+          "au-invoice-check",
         status: "healthy",
       });
     }
@@ -148,6 +178,7 @@ export default {
         mcp: "/mcp",
         mcp_tools: [
           "validate_tax_invoice",
+          "check_invoice_gst",
         ],
       });
     }
